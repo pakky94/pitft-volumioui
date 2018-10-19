@@ -8,7 +8,7 @@ import pygame
 import config
 import daemon
 
-os.environ["SDL_FBDEV"] = "/dev/fb1"
+os.environ["SDL_FBDEV"] = config.display_device
 
 class PitftDaemon(daemon.Daemon):
 
