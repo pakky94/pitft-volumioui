@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 import time
 
@@ -7,6 +8,7 @@ import pygame
 import config
 import daemon
 
+os.environ["SDL_FBDEV"] = "/dev/fb1"
 
 class PitftDaemon(daemon.Daemon):
 
