@@ -116,6 +116,8 @@ class PitftDaemon(daemon.Daemon):
         if config.mouse_type == "pitft_touchscreen":
             while not self.touch.queue_empty():
                 for e in self.touch.get_event():
+                    e["x"] = int(e["x"] / 10)
+                    e["y"] = int(e["y"] / 10)
                     self.sm.mouse_event(e)
                     print(e)
         elif config.mouse_type == "pygame":
