@@ -117,6 +117,7 @@ class PitftDaemon(daemon.Daemon):
             while not self.touch.queue_empty():
                 for e in self.touch.get_event():
                     self.sm.mouse_event(e)
+                    print(e)
         elif config.mouse_type == "pygame":
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEMOTION:
@@ -134,7 +135,6 @@ class PitftDaemon(daemon.Daemon):
                                         "y": event.pos[1],
                                         "touch": 0
                                         })
-
 
     def quit(self):
         logger.info("Quitting...")
