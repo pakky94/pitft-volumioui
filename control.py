@@ -13,8 +13,6 @@ class Controller():
     def mpdconnect(self, ip, port):
         try:
             self.mpdclient.connect(ip, port)  # connect to localhost:6600
-            print(self.mpdclient.mpd_version)          # print the MPD version
-            print(self.mpdclient.find("any", "house")) # print result of the command "find any house"
             self.logger.info("Connected to MPD server at " + str(ip) + ":" + str(port))
             self.mpdconnected = True
         except Exception as e:
@@ -28,6 +26,20 @@ class Controller():
     def startPlay(self):
         if self.mpdconnected:
             self.mpdclient.play()
+
+    def playPrevious(self):
+        if self.mpdconnected:
+            try:
+                self.mpdclient.previous()
+            except Exception as e:
+                self.logger.error(e)
+    
+    def playNext(self):
+        if self.mpdconnected:
+            try:
+                self.mpdclient.next()
+            except Exception as e:
+                self.logger.error(e)
             
     def toggleplay(self):
         if self.mpdconnected:
@@ -38,6 +50,13 @@ class Controller():
             return self.mpdclient.status()
         else:
             return {}
+    
+    def setVolume(self, volume):
+        if self.mpdconnected:
+            try:
+                self.mpdclient.setvol(volume)
+            except Exception as e:
+                self.logger.error(e)
 
     def mpddisconnect(self):
         self.mpdclient.close()                     # send the close command

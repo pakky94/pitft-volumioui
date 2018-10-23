@@ -60,6 +60,11 @@ class PlayerUI():
         self.currentSongTitleLast = ""
         self.currentSongTitleRender = None
 
+        self.currentVolume = -10
+        self.currentVolumeLast = -10
+        self.currentVolumeRender = None
+        self.volumePreMute = -10
+
     def load(self):
         self.logger.debug("Initializing UI")
         self.path = os.path.dirname(os.path.realpath(__file__)) + "/"
@@ -72,19 +77,41 @@ class PlayerUI():
         self.image["background"] = pygame.image.load(self.path + "data/" + "background.png")
         self.image["button-play"] = pygame.image.load(self.path + "data/" + "button-play.png")
         self.image["button-pause"] = pygame.image.load(self.path + "data/" + "button-pause.png")
+        self.image["button-previous"] = pygame.image.load(self.path + "data/" + "button-previous.png")
+        self.image["button-next"] = pygame.image.load(self.path + "data/" + "button-next.png")
+        self.image["volume-up"] = pygame.image.load(self.path + "data/" + "volume-up.png")
+        self.image["volume-down"] = pygame.image.load(self.path + "data/" + "volume-down.png")
 
         self.buttons = {}
         self.buttons["play-pause"] = ImgButton((220, 250), (48, 48), image=self.image["button-play"])
+        self.buttons["play-previous"] = ImgButton((165, 250), (48, 48), image=self.image["button-previous"])
+        self.buttons["play-next"] = ImgButton((275, 250), (48, 48), image=self.image["button-next"])
+        self.buttons["volume-up"] = ImgButton((410, 250), (48, 48), image=self.image["volume-up"])
+        self.buttons["volume-down"] = ImgButton((360, 250), (48, 48), image=self.image["volume-down"])
 
 
     def update(self):
         self.currentstatus = self.controller.playerstatus()
         currentsong = self.controller.currentsong()
         
+        # render current song title
         if "title" in currentsong:
             self.currentSongTitle = currentsong["title"]
         else:
             self.currentSongTitle = ""
+        if not self.currentSongTitle == self.currentSongTitleLast:
+            self.currentSongTitleRender = self.myFont.render(self.currentSongTitle, True, config.main_text_color)
+            self.currentSongTitleLast = self.currentSongTitle
+        
+        #
+        if "volume" in self.currentstatus:
+            self.currentVolume = int(self.currentstatus["volume"])
+            # print(str(self.currentVolume) + " - " + str(self.currentstatus["volume"]))
+        else:
+            self.currentVolume = -10
+        if not self.currentVolume == self.currentVolumeLast:
+            self.currentVolumeRender = self.myFont.render(str(self.currentVolume), True, config.main_text_color)
+            self.currentVolumeLast = self.currentVolume
 
         # change the play/pause button image based on the player status
         if "state" in self.currentstatus.keys():
@@ -100,16 +127,17 @@ class PlayerUI():
 
                 
         
-        if not self.currentSongTitle == self.currentSongTitleLast:
-            self.currentSongTitleRender = self.myFont.render(self.currentSongTitle, True, (0, 255, 0))
-            self.currentSongTitleLast = self.currentSongTitle
+        
 
     
     def render(self, surface):
         
         surface.blit(self.image["background"], (0,0))
         
-        surface.blit(self.currentSongTitleRender, (20, 20))
+        if self.currentSongTitleRender:
+            surface.blit(self.currentSongTitleRender, (20, 20))
+        if self.currentVolumeRender:
+            surface.blit(self.currentVolumeRender, (390, 205))
 
         for n, b in self.buttons.items():
             b.render(surface)
@@ -124,7 +152,23 @@ class PlayerUI():
                 self.controller.startPlay()
             else:
                 self.controller.toggleplay()
+
+        if self.buttons["play-previous"].is_clicked and not self.buttons["play-previous"].was_clicked:
+            print("previous button pressed")
+            self.controller.playPrevious()
+        if self.buttons["play-next"].is_clicked and not self.buttons["play-next"].was_clicked:
+            self.controller.playNext()
         
-        # if self.buttons["play-pause"].was_clicked and not self.buttons["play-pause"].is_clicked:
-        #     print("play button released")
-    
+
+        if self.buttons["volume-up"].is_clicked and not self.buttons["volume-up"].was_clicked:
+            if self.currentVolume >= 0:
+                volHelp = self.currentVolume + 5
+                if volHelp > 100:
+                    volHelp = 100
+                self.controller.setVolume(volHelp)
+        if self.buttons["volume-down"].is_clicked and not self.buttons["volume-down"].was_clicked:
+            if self.currentVolume >= 0:
+                volHelp = self.currentVolume - 5
+                if volHelp < 0:
+                    volHelp = 0
+                self.controller.setVolume(volHelp)
