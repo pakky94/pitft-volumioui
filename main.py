@@ -75,13 +75,13 @@ class PitftDaemon(daemon.Daemon):
         self.sm = PlayerUI(logger, controller=self.controller)
 
 
+        self.mouse_event = {"x": 0, "y": 0, "touch": 0}
 
 
-
-        self.xmin = 5000
-        self.ymin = 5000
-        self.xmax = -1000
-        self.ymax = -1000
+        # self.xmin = 5000
+        # self.ymin = 5000
+        # self.xmax = -1000
+        # self.ymax = -1000
 
     def run(self):
         self.setup()
@@ -112,15 +112,41 @@ class PitftDaemon(daemon.Daemon):
                     mpdreconnecttimer = 0
                     self.controller.mpdconnect(config.mpdip, config.mpdport)
 
-            self.read_mouse()
-            self.sm.update()
+            #self.read_mouse()
+            currentTime = pygame.time.get_ticks()
+            self.update_mouse()
+            self.sm.update(self.mouse_event, currentTime)
             self.sm.render(self.screen)
 
             pygame.display.update()
-            clock.tick(30)
+            clock.tick(15)
         # while True:
         #     time.sleep(1)
         #     pass
+
+    def update_mouse(self):
+        # mouse_event = {"x": 0, "y": 0, "touch": 0}
+        if config.mouse_type == "pitft_touchscreen":
+            self.mouse_event["touch"] = 0
+            while not self.touch.queue_empty():
+                for e in self.touch.get_event():
+                    self.mouse_event["x"] = config.screen_width - int((e["y"] - config.touch_ymin) / (config.touch_ymax - config.touch_ymin) * config.screen_width)
+                    self.mouse_event["y"] = int((e["x"] - config.touch_xmin) / (config.touch_xmax - config.touch_xmin) * config.screen_height)
+                    self.mouse_event["touch"] = 1
+        elif config.mouse_type == "pygame":
+            for e in pygame.event.get():
+                if e.type == pygame.MOUSEMOTION:
+                    self.mouse_event["x"] = e.pos[0]
+                    self.mouse_event["y"] = e.pos[1]
+                elif e.type == pygame.MOUSEBUTTONDOWN:
+                    self.mouse_event["x"] = e.pos[0]
+                    self.mouse_event["y"] = e.pos[1]
+                    self.mouse_event["touch"] = 1
+                elif e.type == pygame.MOUSEBUTTONUP:
+                    self.mouse_event["x"] = e.pos[0]
+                    self.mouse_event["y"] = e.pos[1]
+                    self.mouse_event["touch"] = 0
+        # return(mouse_event)
 
     def read_mouse(self):
         if config.mouse_type == "pitft_touchscreen":
@@ -129,19 +155,34 @@ class PitftDaemon(daemon.Daemon):
                     
 
 
-                    if e["x"] < self.xmin:
-                        self.xmin = e["x"]
-                    if e["y"] < self.ymin:
-                        self.ymin = e["y"]
-                    if e["x"] > self.xmax:
-                        self.xmax = e["x"]
-                    if e["y"] > self.ymax:
-                        self.ymax = e["y"]
+                    # if e["x"] < self.xmin:
+                    #     self.xmin = e["x"]
+                    # if e["y"] < self.ymin:
+                    #     self.ymin = e["y"]
+                    # if e["x"] > self.xmax:
+                    #     self.xmax = e["x"]
+                    # if e["y"] > self.ymax:
+                    #     self.ymax = e["y"]
                     
-
+                    """
+                    2018-10-23 21:35:24,612 INFO x min: 345
+                    2018-10-23 21:35:24,612 INFO x max: 3715
+                    2018-10-23 21:35:24,612 INFO y min: 184
+                    2018-10-23 21:35:24,613 INFO y max: 3853
 
                     helpvar = int(e["x"] / 3840 * config.screen_height)
                     e["x"] = config.screen_width - int(e["y"] / 3840 * config.screen_width)
+                    e["y"] = helpvar
+
+                    touch_xmin = 345
+                    touch_xmax = 3715
+                    touch_ymin = 184
+                    touch_ymax = 3853
+                    """
+
+
+                    helpvar = int((e["x"] - config.touch_xmin) / (config.touch_xmax - config.touch_xmin) * config.screen_height)
+                    e["x"] = config.screen_width - int((e["y"] - config.touch_ymin) / (config.touch_ymax - config.touch_ymin) * config.screen_width)
                     e["y"] = helpvar
                     self.sm.mouse_event(e)
         elif config.mouse_type == "pygame":
@@ -166,10 +207,10 @@ class PitftDaemon(daemon.Daemon):
         logger.info("Quitting...")
 
 
-        print("x min: " + str(self.xmin))
-        print("x max: " + str(self.xmax))
-        print("y min: " + str(self.ymin))
-        print("y max: " + str(self.ymax))
+        # print("x min: " + str(self.xmin))
+        # print("x max: " + str(self.xmax))
+        # print("y min: " + str(self.ymin))
+        # print("y max: " + str(self.ymax))
 
 
         if config.mouse_type == "pitft_touchscreen":

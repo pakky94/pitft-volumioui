@@ -5,6 +5,10 @@ mouse_device = "/dev/input/event0"
 mouse_driver = "TSLIB"
 if raspberry:
     mouse_type = "pitft_touchscreen"
+    touch_xmin = 345
+    touch_xmax = 3715
+    touch_ymin = 184
+    touch_ymax = 3853
 else:
     mouse_type = "pygame"
 

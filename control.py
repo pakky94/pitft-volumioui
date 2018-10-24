@@ -18,11 +18,12 @@ class Controller():
         except Exception as e:
             print(e)
 
-    def currentsong(self):
+    def currentSong(self):
         if self.mpdconnected:
             return self.mpdclient.currentsong()
         else:
             return {}
+
     def startPlay(self):
         if self.mpdconnected:
             self.mpdclient.play()
@@ -30,7 +31,11 @@ class Controller():
     def playPrevious(self):
         if self.mpdconnected:
             try:
-                self.mpdclient.previous()
+                status = self.mpdclient.status()
+                if int(status["time"].split(':')[0]) < 3:
+                    self.mpdclient.previous()
+                else:
+                    self.mpdclient.seekcur(0)
             except Exception as e:
                 self.logger.error(e)
     
@@ -45,7 +50,7 @@ class Controller():
         if self.mpdconnected:
             self.mpdclient.pause()
 
-    def playerstatus(self):
+    def playerStatus(self):
         if self.mpdconnected:
             return self.mpdclient.status()
         else:
@@ -58,10 +63,10 @@ class Controller():
             except Exception as e:
                 self.logger.error(e)
 
-    def mpddisconnect(self):
+    def mpdDisconnect(self):
         self.mpdclient.close()                     # send the close command
         self.mpdclient.disconnect()                # disconnect from the server
         self.mpdconnected = False
 
     def quit(self):
-        self.mpddisconnect()
+        self.mpdDisconnect()

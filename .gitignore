@@ -1,7 +1,6 @@
 .vscode/*
 __pycache__/*
-
-
+_.pid
 test1.txt
 test2.txt
 pitft-playerui.log
