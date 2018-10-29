@@ -1,4 +1,4 @@
-raspberry = False
+raspberry = True
 
 display_device = "/dev/fb1"
 mouse_device = "/dev/input/event0"
