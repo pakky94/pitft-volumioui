@@ -31,4 +31,8 @@ else:
 
 font = "Comic Sans MS"
 font_size = 32
-main_text_color = (0, 255, 0)
+title_text_color = (255, 255, 255)
+album_text_color = (255, 255, 255)
+artist_text_color = (255, 255, 255)
+
+coverArtSize = 196
